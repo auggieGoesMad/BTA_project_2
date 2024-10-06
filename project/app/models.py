@@ -23,7 +23,7 @@ class History(models.Model):
         ('failure', 'Failuire')
     ]
 
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='sucess')
 
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
@@ -32,7 +32,7 @@ class History(models.Model):
         ('debit', 'Debit')
     ]
 
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='deposit')
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
@@ -43,4 +43,4 @@ class History(models.Model):
     # Example:
     # 'Tom - withdrawal - 100 - success'.
     def __str__(self):
-        return f"{self.user.username} - {self.type} - {self.amount} - {self.status}"
+        return f"{self.user.username} - {self.get_type_display()} - {self.amount} - {self.get_status_display()}"
