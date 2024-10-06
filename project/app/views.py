@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import logout
+from django.db.models import Sum, Max
 from django.views.generic import CreateView, TemplateView, View, ListView
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect
@@ -13,15 +14,18 @@ def logout_view(request):
     logout(request)
     return redirect('login') 
 
-def getBalance(user):
-    pass # this line can be deleted 
+def getBalance(user):    
     '''
     Write a function that finds the user's balance and returns it with the float data type. 
     To calculate the balance, calculate the sum of all user's deposits and the sum of all withdrawals.
     Then subtract the withdrawal amount from the deposit amount and return the result.
     '''
+    entriesDeposit = History.objects.filter(user = user, status = 'success', type = 'deposit').aggregate(total=Sum('amount'))['total'] or 0
+    entriesDebit = History.objects.filter(user = user, status = 'success', type = 'withdraw').aggregate(total=Sum('amount'))['total'] or 0
+
+    return float(entriesDeposit - entriesDebit)
+
 def getCurrencyParams():
-    pass # this line can be deleted 
     '''
     Write a function that makes a GET request to the following address 
     https://fake-api.apps.berlintech.ai/api/currency_exchange
@@ -36,6 +40,22 @@ def getCurrencyParams():
     return the list [None, None]
     '''
 
+    url = "https://fake-api.apps.berlintech.ai/api/currency_exchange"
+    
+    try:
+        response = requests.get(url)
+
+        if response.status_code == 200:
+            data = response.json()
+            
+            currency_list = [(currency, f"{currency} ({rate})") for currency, rate in data.items()]
+
+            return data, currency_list
+        
+    except requests.RequestException as e:
+        print(f"Request failed: {e}")
+
+    return None, None 
 
 class CreateUserView(CreateView):
     '''

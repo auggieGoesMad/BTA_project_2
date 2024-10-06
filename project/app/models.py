@@ -29,7 +29,7 @@ class History(models.Model):
 
     TYPE_CHOICES = [
         ('deposit', 'Deposit'),
-        ('debit', 'Debit')
+        ('withdraw', 'Debit')
     ]
 
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='deposit')
