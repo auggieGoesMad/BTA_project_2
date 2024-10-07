@@ -65,12 +65,18 @@ class CreateUserView(CreateView):
     The file create_account.html should be used as a template.
     If the account is successfully created, it should redirect to the page with the name login
     '''
-    
+    model = User
+    form_class = CreateUserForm
+    template_name = 'app/create_account.html'
+    success_url = reverse_lazy('login')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         '''
         If the user is authenticated, then add the 'username' key with the value of username to the context.
         '''
+        if self.request.user.is_authenticated:
+            context['username'] = self.request.user.username
         return context
 
 class CustomLoginView(LoginView):
@@ -79,6 +85,8 @@ class CustomLoginView(LoginView):
     specify the login.html file as the template
     if authentication is positive, add redirect to main_menu page
     '''
+    template_name = 'app/login.html'
+    success_url = reverse_lazy('main_menu')
 
     def get_success_url(self):
         return self.success_url
@@ -88,6 +96,9 @@ class CustomLoginView(LoginView):
         '''
         If the user is authenticated, then add the 'username' key with the value of username to the context.
         '''
+        if self.request.user.is_authenticated:
+            context['username'] = self.request.user.username
+            
         return context
 
 class MainMenuView(LoginRequiredMixin, TemplateView):
