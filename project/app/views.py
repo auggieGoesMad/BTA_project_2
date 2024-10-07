@@ -98,7 +98,7 @@ class CustomLoginView(LoginView):
         '''
         if self.request.user.is_authenticated:
             context['username'] = self.request.user.username
-            
+
         return context
 
 class MainMenuView(LoginRequiredMixin, TemplateView):
@@ -109,13 +109,15 @@ class MainMenuView(LoginRequiredMixin, TemplateView):
         '''
         If the user is authenticated, then add the 'username' key with the value of username to the context.
         '''
+        if self.request.user.is_authenticated:
+            context['username'] = self.request.user.username
+
         return context
 
 class BalanceOperationsView(LoginRequiredMixin, View):
     template_name = 'app/operations.html'
     
     def get(self, request):
-        pass # this line can be deleted 
         '''
         This method should return the page given in template_name with a context.
 
@@ -123,9 +125,16 @@ class BalanceOperationsView(LoginRequiredMixin, View):
         The balance key contains the result of the getBalance function
         username contains the username of the user.
         '''
+        balance = getBalance(request.user)
+        context = {
+            'balance': balance,
+            'username': request.user.username
+        }
+
+        return render(request, self.template_name, context)
+
 
     def post(self, request):
-        pass # this line can be deleted 
         '''
         This method should process a balance transaction.
         For this purpose it is necessary to add an entry to the History model. 
@@ -141,6 +150,30 @@ class BalanceOperationsView(LoginRequiredMixin, View):
         The balance key contains the result of the getBalance function (after account update)
         username contains the username of the user.
         '''
+        amount = float(request.POST.get('amount'))
+        type = request.POST.get('operation')
+
+        if (type == "withdraw"):
+            current_balance = getBalance(request.user)
+
+            if amount > current_balance:
+                status = 'failure'
+                History.objects.create(user = request.user, amount = amount, status = status, type = type)
+            else:
+                status = 'success'
+                History.objects.create(user = request.user, amount = amount, status = status, type = type)
+        else:
+            status = 'success'
+            History.objects.create(user = request.user, amount = amount, status = status, type = type)
+
+        balance = getBalance(request.user)
+        context = {
+            'balance': balance,
+            'username': request.user.username
+        }
+
+        return render(request, self.template_name, context)
+        
 
 class ViewTransactionHistoryView(LoginRequiredMixin, ListView):
     model = History
@@ -152,12 +185,17 @@ class ViewTransactionHistoryView(LoginRequiredMixin, ListView):
         '''
         This method should return the entire transaction history of the current user
         '''
+        transactions_history = History.objects.filter(user = self.request.user)
+
+        return transactions_history
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         '''
         Add the 'username' key with the value of username to the context.
         '''
+        context['username'] = self.request.user.username
+
         return context
 
 class CurrencyExchangeView(LoginRequiredMixin, View):
@@ -171,6 +209,11 @@ class CurrencyExchangeView(LoginRequiredMixin, View):
         currency_choices contains the value of the currency_choices variable
         username contains the name of the current user
         '''
+        context = {
+            'curreny_choices': currency_choices,
+            'username': request.user.username,
+            **self.empty_context
+        }
         return render(request, self.template_name, context)
 
     def post(self, request):
@@ -185,3 +228,32 @@ class CurrencyExchangeView(LoginRequiredMixin, View):
             5) generate the exchanged_amount variable, which contains the converted currency to two decimal places.
             6) form a context from the previously created variables and return a template with it.
         '''
+        try:
+            amount = float(request.POST.get('amount', 0))
+        except (TypeError, ValueError):
+            amount = None
+
+        currency = request.POST.get('currency', None)
+
+        empty_context = {
+            'currency_choices': currency_choices,
+            'amount': None,
+            'currency': None,
+            'exchanged_amount': None
+        }
+
+        if data is None or amount is None or currency is None:
+            return render(request, self.template_name, empty_context)
+        
+        exchange_rate = data.get(currency.split()[0])
+        exchanged_amount = round(amount * exchange_rate, 2)
+
+        context = {
+            'currency_choices': currency_choices,
+            'amount': amount,
+            'currency': currency,
+            'exchanged_amount': exchanged_amount,
+            'username': request.user.username
+        }
+
+        return render(request, self.template_name, context)
