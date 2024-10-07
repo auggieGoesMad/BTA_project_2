@@ -20,11 +20,16 @@
         the balance is not equal to 0
 
         Example of output with a zero balance:
-        <p>You have a zero balance</p>
-
+        
         Example of output with a non-zero balance: 
-        <p>Your current balance: $215</p> 
+        
         -->
+
+        {% if balance %}
+            <p>Your current balance: ${{ balance }}</p>
+        {% else %}
+            <p>You have a zero balance</p>
+        {% endif %}
         
         <div class="row">
             <div class="col-md-12">
