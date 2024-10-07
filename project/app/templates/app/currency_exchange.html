@@ -29,6 +29,9 @@
 
                         Example: <option value="USD">USD (1.15)</option> 
                     -->
+                    {% for code, display in currency_choices %}
+                        <option value="{{ code }}">{{display}}</option>
+                    {% endfor %}
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Exchange</button>
@@ -38,12 +41,15 @@
         exchanged_amount values, they should be displayed in the next layout 
         block, otherwise nothing needs to be displayed.
         
-        <div class="mt-3">
-            <p><strong>Amount:</strong> amount value </p>
-            <p><strong>Currency:</strong> currency value</p>
-            <p><strong>Exchanged Amount:</strong> exchanged_amount value</p>
-        </div> 
         -->
+        {% if amount and currency and exchanged_amount %}
+        <div class="mt-3">
+            <p><strong>Amount:</strong> {{ amount }} </p>
+            <p><strong>Currency:</strong> {{ currency }}</p>
+            <p><strong>Exchanged Amount:</strong> {{ exchanged_amount }}</p>
+        </div> 
+        {% endif %}
+
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.1/dist/umd/popper.min.js"></script>
