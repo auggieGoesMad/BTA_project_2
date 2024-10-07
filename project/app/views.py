@@ -210,9 +210,9 @@ class CurrencyExchangeView(LoginRequiredMixin, View):
         username contains the name of the current user
         '''
         context = {
-            'curreny_choices': currency_choices,
-            'username': request.user.username,
-            **self.empty_context
+            **self.empty_context,
+            'currency_choices': currency_choices,
+            'username': request.user.username
         }
         return render(request, self.template_name, context)
 
@@ -228,6 +228,9 @@ class CurrencyExchangeView(LoginRequiredMixin, View):
             5) generate the exchanged_amount variable, which contains the converted currency to two decimal places.
             6) form a context from the previously created variables and return a template with it.
         '''
+        empty_context = {
+            **self.empty_context
+        }
         try:
             amount = float(request.POST.get('amount', 0))
         except (TypeError, ValueError):
@@ -235,12 +238,12 @@ class CurrencyExchangeView(LoginRequiredMixin, View):
 
         currency = request.POST.get('currency', None)
 
-        empty_context = {
-            'currency_choices': currency_choices,
-            'amount': None,
-            'currency': None,
-            'exchanged_amount': None
-        }
+        # empty_context = {
+        #     'currency_choices': currency_choices,
+        #     'amount': None,
+        #     'currency': None,
+        #     'exchanged_amount': None
+        # }
 
         if data is None or amount is None or currency is None:
             return render(request, self.template_name, empty_context)
