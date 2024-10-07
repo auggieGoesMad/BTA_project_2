@@ -17,17 +17,25 @@
         <ul class="list-group">
             <!-- 
             Using a loop, display the transactions. Each transaction should be displayed as a card. If there are no transactions, display the element:
-            <li class="list-group-item">No transactions found.</li>
 
             Example card:
-            <li class="list-group-item">
-                <p>Date: 28/03/2024 12:38:55</p>
-                <p>Status: success</p>
-                <p>Balance After: 100.00</p>
-            </li>
-
-            For date, use the filter date: "d/m/Y H:i:s".
+            For date, use the filter date: "".
             -->
+            {% if transactions %}
+                {% for transaction in transactions %}
+                    <li class="list-group-item">
+                        <div class="card">
+                            <div class="card-body">
+                                <p>Date: {{ transaction.datetime|date:"d/m/Y H:i:s" }}</p>
+                                <p>Status: {{ transaction.status }}</p>
+                                <p>Balance After: {{ transaction.amount}}</p>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="list-group-item">No transactions found.</li>
+            {% endif %}
         </ul>
     </div>
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
